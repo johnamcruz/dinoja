@@ -1,0 +1,646 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6B0D7E6B2ACA3F28001A94FD /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B0D7E6A2ACA3F28001A94FD /* Images.swift */; };
+		6B0D7E6D2ACA43FE001A94FD /* LandingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B0D7E6C2ACA43FE001A94FD /* LandingView.swift */; };
+		6B0D7E6F2ACA4E79001A94FD /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B0D7E6E2ACA4E79001A94FD /* GameScene.swift */; };
+		6B0D7E752ACA6790001A94FD /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 6B0D7E742ACA6790001A94FD /* GameScene.sks */; };
+		6B0D7E772ACA67A9001A94FD /* dinoja.sks in Resources */ = {isa = PBXBuildFile; fileRef = 6B0D7E762ACA67A9001A94FD /* dinoja.sks */; };
+		6B0D7E812ACA6CF3001A94FD /* life.sks in Resources */ = {isa = PBXBuildFile; fileRef = 6B0D7E802ACA6CF3001A94FD /* life.sks */; };
+		6B4AF7DA29FFA4B8001ED15D /* DinojaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4AF7D929FFA4B8001ED15D /* DinojaApp.swift */; };
+		6B4AF7DE29FFA4B9001ED15D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B4AF7DD29FFA4B9001ED15D /* Assets.xcassets */; };
+		6B4AF7E129FFA4B9001ED15D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B4AF7E029FFA4B9001ED15D /* Preview Assets.xcassets */; };
+		6B4AF7EB29FFA4B9001ED15D /* DinojaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4AF7EA29FFA4B9001ED15D /* DinojaTests.swift */; };
+		6B4AF7F529FFA4B9001ED15D /* DinojaUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4AF7F429FFA4B9001ED15D /* DinojaUITests.swift */; };
+		6B4AF7F729FFA4B9001ED15D /* DinojaUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4AF7F629FFA4B9001ED15D /* DinojaUITestsLaunchTests.swift */; };
+		6B4AF80529FFA4E5001ED15D /* StartScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4AF80429FFA4E5001ED15D /* StartScene.swift */; };
+		6B4AF80729FFA535001ED15D /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4AF80629FFA535001ED15D /* GameView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6B4AF7E729FFA4B9001ED15D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6B4AF7CE29FFA4B8001ED15D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6B4AF7D529FFA4B8001ED15D;
+			remoteInfo = Dinoja;
+		};
+		6B4AF7F129FFA4B9001ED15D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6B4AF7CE29FFA4B8001ED15D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6B4AF7D529FFA4B8001ED15D;
+			remoteInfo = Dinoja;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		6B0D7E6A2ACA3F28001A94FD /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
+		6B0D7E6C2ACA43FE001A94FD /* LandingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandingView.swift; sourceTree = "<group>"; };
+		6B0D7E6E2ACA4E79001A94FD /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
+		6B0D7E742ACA6790001A94FD /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
+		6B0D7E762ACA67A9001A94FD /* dinoja.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = dinoja.sks; sourceTree = "<group>"; };
+		6B0D7E802ACA6CF3001A94FD /* life.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = life.sks; sourceTree = "<group>"; };
+		6B4AF7D629FFA4B8001ED15D /* Dinoja.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dinoja.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6B4AF7D929FFA4B8001ED15D /* DinojaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DinojaApp.swift; sourceTree = "<group>"; };
+		6B4AF7DD29FFA4B9001ED15D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6B4AF7E029FFA4B9001ED15D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		6B4AF7E629FFA4B9001ED15D /* DinojaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DinojaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6B4AF7EA29FFA4B9001ED15D /* DinojaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DinojaTests.swift; sourceTree = "<group>"; };
+		6B4AF7F029FFA4B9001ED15D /* DinojaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DinojaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6B4AF7F429FFA4B9001ED15D /* DinojaUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DinojaUITests.swift; sourceTree = "<group>"; };
+		6B4AF7F629FFA4B9001ED15D /* DinojaUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DinojaUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		6B4AF80429FFA4E5001ED15D /* StartScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartScene.swift; sourceTree = "<group>"; };
+		6B4AF80629FFA535001ED15D /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6B4AF7D329FFA4B8001ED15D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B4AF7E329FFA4B9001ED15D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B4AF7ED29FFA4B9001ED15D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		6B0D7E692ACA3F16001A94FD /* Constants */ = {
+			isa = PBXGroup;
+			children = (
+				6B0D7E6A2ACA3F28001A94FD /* Images.swift */,
+			);
+			path = Constants;
+			sourceTree = "<group>";
+		};
+		6B4AF7CD29FFA4B8001ED15D = {
+			isa = PBXGroup;
+			children = (
+				6B4AF7D829FFA4B8001ED15D /* Dinoja */,
+				6B4AF7E929FFA4B9001ED15D /* DinojaTests */,
+				6B4AF7F329FFA4B9001ED15D /* DinojaUITests */,
+				6B4AF7D729FFA4B8001ED15D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6B4AF7D729FFA4B8001ED15D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6B4AF7D629FFA4B8001ED15D /* Dinoja.app */,
+				6B4AF7E629FFA4B9001ED15D /* DinojaTests.xctest */,
+				6B4AF7F029FFA4B9001ED15D /* DinojaUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6B4AF7D829FFA4B8001ED15D /* Dinoja */ = {
+			isa = PBXGroup;
+			children = (
+				6B4AF7D929FFA4B8001ED15D /* DinojaApp.swift */,
+				6B4AF7DD29FFA4B9001ED15D /* Assets.xcassets */,
+				6B0D7E692ACA3F16001A94FD /* Constants */,
+				6B4AF7DF29FFA4B9001ED15D /* Preview Content */,
+				6B4AF80329FFA4CF001ED15D /* Scenes */,
+				6B4AF80929FFA572001ED15D /* ViewModels */,
+				6B4AF80829FFA53D001ED15D /* Views */,
+			);
+			path = Dinoja;
+			sourceTree = "<group>";
+		};
+		6B4AF7DF29FFA4B9001ED15D /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				6B4AF7E029FFA4B9001ED15D /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		6B4AF7E929FFA4B9001ED15D /* DinojaTests */ = {
+			isa = PBXGroup;
+			children = (
+				6B4AF7EA29FFA4B9001ED15D /* DinojaTests.swift */,
+			);
+			path = DinojaTests;
+			sourceTree = "<group>";
+		};
+		6B4AF7F329FFA4B9001ED15D /* DinojaUITests */ = {
+			isa = PBXGroup;
+			children = (
+				6B4AF7F429FFA4B9001ED15D /* DinojaUITests.swift */,
+				6B4AF7F629FFA4B9001ED15D /* DinojaUITestsLaunchTests.swift */,
+			);
+			path = DinojaUITests;
+			sourceTree = "<group>";
+		};
+		6B4AF80329FFA4CF001ED15D /* Scenes */ = {
+			isa = PBXGroup;
+			children = (
+				6B0D7E742ACA6790001A94FD /* GameScene.sks */,
+				6B0D7E762ACA67A9001A94FD /* dinoja.sks */,
+				6B0D7E802ACA6CF3001A94FD /* life.sks */,
+				6B0D7E6E2ACA4E79001A94FD /* GameScene.swift */,
+				6B4AF80429FFA4E5001ED15D /* StartScene.swift */,
+			);
+			path = Scenes;
+			sourceTree = "<group>";
+		};
+		6B4AF80829FFA53D001ED15D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				6B4AF80629FFA535001ED15D /* GameView.swift */,
+				6B0D7E6C2ACA43FE001A94FD /* LandingView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		6B4AF80929FFA572001ED15D /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6B4AF7D529FFA4B8001ED15D /* Dinoja */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6B4AF7FA29FFA4B9001ED15D /* Build configuration list for PBXNativeTarget "Dinoja" */;
+			buildPhases = (
+				6B4AF7D229FFA4B8001ED15D /* Sources */,
+				6B4AF7D329FFA4B8001ED15D /* Frameworks */,
+				6B4AF7D429FFA4B8001ED15D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Dinoja;
+			productName = Dinoja;
+			productReference = 6B4AF7D629FFA4B8001ED15D /* Dinoja.app */;
+			productType = "com.apple.product-type.application";
+		};
+		6B4AF7E529FFA4B9001ED15D /* DinojaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6B4AF7FD29FFA4B9001ED15D /* Build configuration list for PBXNativeTarget "DinojaTests" */;
+			buildPhases = (
+				6B4AF7E229FFA4B9001ED15D /* Sources */,
+				6B4AF7E329FFA4B9001ED15D /* Frameworks */,
+				6B4AF7E429FFA4B9001ED15D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6B4AF7E829FFA4B9001ED15D /* PBXTargetDependency */,
+			);
+			name = DinojaTests;
+			productName = DinojaTests;
+			productReference = 6B4AF7E629FFA4B9001ED15D /* DinojaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		6B4AF7EF29FFA4B9001ED15D /* DinojaUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6B4AF80029FFA4B9001ED15D /* Build configuration list for PBXNativeTarget "DinojaUITests" */;
+			buildPhases = (
+				6B4AF7EC29FFA4B9001ED15D /* Sources */,
+				6B4AF7ED29FFA4B9001ED15D /* Frameworks */,
+				6B4AF7EE29FFA4B9001ED15D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6B4AF7F229FFA4B9001ED15D /* PBXTargetDependency */,
+			);
+			name = DinojaUITests;
+			productName = DinojaUITests;
+			productReference = 6B4AF7F029FFA4B9001ED15D /* DinojaUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6B4AF7CE29FFA4B8001ED15D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1430;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					6B4AF7D529FFA4B8001ED15D = {
+						CreatedOnToolsVersion = 14.3;
+					};
+					6B4AF7E529FFA4B9001ED15D = {
+						CreatedOnToolsVersion = 14.3;
+						TestTargetID = 6B4AF7D529FFA4B8001ED15D;
+					};
+					6B4AF7EF29FFA4B9001ED15D = {
+						CreatedOnToolsVersion = 14.3;
+						TestTargetID = 6B4AF7D529FFA4B8001ED15D;
+					};
+				};
+			};
+			buildConfigurationList = 6B4AF7D129FFA4B8001ED15D /* Build configuration list for PBXProject "Dinoja" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 6B4AF7CD29FFA4B8001ED15D;
+			productRefGroup = 6B4AF7D729FFA4B8001ED15D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6B4AF7D529FFA4B8001ED15D /* Dinoja */,
+				6B4AF7E529FFA4B9001ED15D /* DinojaTests */,
+				6B4AF7EF29FFA4B9001ED15D /* DinojaUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6B4AF7D429FFA4B8001ED15D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B0D7E772ACA67A9001A94FD /* dinoja.sks in Resources */,
+				6B4AF7E129FFA4B9001ED15D /* Preview Assets.xcassets in Resources */,
+				6B0D7E812ACA6CF3001A94FD /* life.sks in Resources */,
+				6B0D7E752ACA6790001A94FD /* GameScene.sks in Resources */,
+				6B4AF7DE29FFA4B9001ED15D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B4AF7E429FFA4B9001ED15D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B4AF7EE29FFA4B9001ED15D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6B4AF7D229FFA4B8001ED15D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B0D7E6F2ACA4E79001A94FD /* GameScene.swift in Sources */,
+				6B4AF80529FFA4E5001ED15D /* StartScene.swift in Sources */,
+				6B0D7E6D2ACA43FE001A94FD /* LandingView.swift in Sources */,
+				6B0D7E6B2ACA3F28001A94FD /* Images.swift in Sources */,
+				6B4AF80729FFA535001ED15D /* GameView.swift in Sources */,
+				6B4AF7DA29FFA4B8001ED15D /* DinojaApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B4AF7E229FFA4B9001ED15D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B4AF7EB29FFA4B9001ED15D /* DinojaTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6B4AF7EC29FFA4B9001ED15D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6B4AF7F529FFA4B9001ED15D /* DinojaUITests.swift in Sources */,
+				6B4AF7F729FFA4B9001ED15D /* DinojaUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6B4AF7E829FFA4B9001ED15D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6B4AF7D529FFA4B8001ED15D /* Dinoja */;
+			targetProxy = 6B4AF7E729FFA4B9001ED15D /* PBXContainerItemProxy */;
+		};
+		6B4AF7F229FFA4B9001ED15D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6B4AF7D529FFA4B8001ED15D /* Dinoja */;
+			targetProxy = 6B4AF7F129FFA4B9001ED15D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		6B4AF7F829FFA4B9001ED15D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		6B4AF7F929FFA4B9001ED15D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		6B4AF7FB29FFA4B9001ED15D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Dinoja/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.johnamcruz.Dinoja;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6B4AF7FC29FFA4B9001ED15D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Dinoja/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.johnamcruz.Dinoja;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6B4AF7FE29FFA4B9001ED15D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.johnamcruz.DinojaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Dinoja.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Dinoja";
+			};
+			name = Debug;
+		};
+		6B4AF7FF29FFA4B9001ED15D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.johnamcruz.DinojaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Dinoja.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Dinoja";
+			};
+			name = Release;
+		};
+		6B4AF80129FFA4B9001ED15D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.johnamcruz.DinojaUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Dinoja;
+			};
+			name = Debug;
+		};
+		6B4AF80229FFA4B9001ED15D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.johnamcruz.DinojaUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Dinoja;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6B4AF7D129FFA4B8001ED15D /* Build configuration list for PBXProject "Dinoja" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B4AF7F829FFA4B9001ED15D /* Debug */,
+				6B4AF7F929FFA4B9001ED15D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6B4AF7FA29FFA4B9001ED15D /* Build configuration list for PBXNativeTarget "Dinoja" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B4AF7FB29FFA4B9001ED15D /* Debug */,
+				6B4AF7FC29FFA4B9001ED15D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6B4AF7FD29FFA4B9001ED15D /* Build configuration list for PBXNativeTarget "DinojaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B4AF7FE29FFA4B9001ED15D /* Debug */,
+				6B4AF7FF29FFA4B9001ED15D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6B4AF80029FFA4B9001ED15D /* Build configuration list for PBXNativeTarget "DinojaUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B4AF80129FFA4B9001ED15D /* Debug */,
+				6B4AF80229FFA4B9001ED15D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 6B4AF7CE29FFA4B8001ED15D /* Project object */;
+}
