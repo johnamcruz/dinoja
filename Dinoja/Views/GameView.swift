@@ -9,25 +9,19 @@ import SwiftUI
 import SpriteKit
 
 struct GameView: View {
-    var scene: SKScene {
-        let scene = SKScene(fileNamed: Images.gameScene)!
-        scene.size = CGSize(width: 640, height: 1140)
-        scene.scaleMode = .aspectFill
-        return scene
-    }
-    
+    @Environment(\.dismiss) private var dismiss
+    // Stored in @State so the scene is created once instead of on every view update.
+    @State private var scene = GameScene.makeScene()
+
     var body: some View {
         SpriteView(scene: scene)
-            .frame(minWidth: 0,
-                   maxWidth: .infinity,
-                   minHeight: 0,
-                   maxHeight: .infinity)
             .ignoresSafeArea()
+            .onAppear {
+                scene.onExit = { dismiss() }
+            }
     }
 }
 
-struct GameView_Previews: PreviewProvider {
-    static var previews: some View {
-        GameView()
-    }
+#Preview {
+    GameView()
 }
