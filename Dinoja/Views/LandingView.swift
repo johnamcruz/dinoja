@@ -2,8 +2,6 @@
 //  LandingView.swift
 //  Dinoja
 //
-//  Created by John M Cruz on 10/1/23.
-//
 
 import SwiftUI
 
