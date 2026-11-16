@@ -15,64 +15,33 @@ private enum PhysicsCategory {
     static let star: UInt32 = 1 << 3
 }
 
-/// Node names used to find objects in the scene and in `GameScene.sks`.
+/// Node names used to find objects in `GameScene.sks`.
 private enum NodeName {
     static let background = "background"
     static let dino = "dinoja"
     static let lives = "score"   // The lives sprite in GameScene.sks is named "score".
-    static let pauseButton = "pauseButton"
-    static let continueButton = "continueButton"
 }
 
+/// The gameplay: the dino, falling items, ninja stars and collisions.
+/// The score, hearts and overlays are drawn in SwiftUI from `model`.
 class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
-    /// Called when the player leaves the game (Continue on the game over screen).
-    var onExit: (() -> Void)?
+    private(set) var model = GameModel()
 
     // MARK: Tuning
 
-    private let startingLives = 3
     private let dinoScale: CGFloat = 0.6
     private let groundY: CGFloat = -515           // top of the ground strip in the background art
     private let fireInterval: TimeInterval = 0.5
     private let invincibilityDuration: TimeInterval = 1.5
 
-    // Difficulty ramps from the "easy" value to the "hard" value as the score
-    // goes from 0 to `maxDifficultyScore`, then stays at the hard value.
-    private let maxDifficultyScore = 1000
-    private let wasabiChance: (easy: Double, hard: Double) = (0.15, 0.35)
-    private let fallDuration: (easy: TimeInterval, hard: TimeInterval) = (4.5, 2.0)
-    private let spawnInterval: (easy: TimeInterval, hard: TimeInterval) = (1.1, 0.6)
-
-    // MARK: Nodes
+    // MARK: Nodes and state
 
     private var dino = SKSpriteNode()
-    private var livesNode = SKSpriteNode()
-    private let pauseButton = SKSpriteNode(imageNamed: Images.pauseButton)
-    private let scoreLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
-    /// Holds falling items and stars so gameplay can be paused without pausing the overlays.
-    private let gameLayer = SKNode()
-    private var overlay: SKNode?
-
-    // MARK: State
-
-    private var score = 0 {
-        didSet { scoreLabel.text = "\(score)" }
-    }
-    private var lives = 3 {
-        didSet { livesNode.texture = SKTexture(imageNamed: Images.life(max(lives, 0))) }
-    }
     private var facingRight = true
-    private var isGameOver = false
-    private var isGamePaused = false
     private var isInvincible = false
 
-    /// 0 at the start of the game, rising to 1 at `maxDifficultyScore`.
-    private var difficulty: Double {
-        min(Double(score) / Double(maxDifficultyScore), 1)
-    }
-
-    private func ramp<T: BinaryFloatingPoint>(_ range: (easy: T, hard: T)) -> T {
-        range.easy + (range.hard - range.easy) * T(difficulty)
+    private var isPlaying: Bool {
+        model.phase == .playing
     }
 
     /// Creates the scene from `GameScene.sks`, sized to match the background art.
@@ -92,33 +61,25 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
 
         setUpBackground()
         setUpDino()
-        setUpHUD()
-        addChild(gameLayer)
 
-        startGame()
-    }
+        // SwiftUI draws the hearts now, so drop the lives sprite from the .sks layout.
+        childNode(withName: NodeName.lives)?.removeFromParent()
 
-    private func startGame() {
-        score = 0
-        lives = startingLives
-        isGameOver = false
-
-        // Spawning and firing run on the game layer so they stop when it is paused.
         let fire = SKAction.sequence([
-            .run { [weak self] in self?.throwStar() },
+            .onMain { [weak self] in self?.throwStar() },
             .wait(forDuration: fireInterval)
         ])
-        gameLayer.run(.repeatForever(fire))
+        run(.repeatForever(fire))
         scheduleNextSpawn()
     }
 
     /// Spawns one item, then schedules the next. Each wait is recalculated so
     /// items come faster as the difficulty rises (a fixed repeatForever can't do that).
     private func scheduleNextSpawn() {
-        let interval = ramp(spawnInterval)
-        gameLayer.run(.sequence([
+        let interval = model.spawnInterval
+        run(.sequence([
             .wait(forDuration: interval, withRange: interval * 0.4),
-            .run { [weak self] in
+            .onMain { [weak self] in
                 self?.spawnFallingItem()
                 self?.scheduleNextSpawn()
             }
@@ -164,35 +125,6 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         dino.physicsBody = body
     }
 
-    private func setUpHUD() {
-        let halfWidth = visibleSize.width / 2
-        let top = visibleSize.height / 2 - topInset - 40
-
-        pauseButton.name = NodeName.pauseButton
-        pauseButton.setScale(2)
-        pauseButton.position = CGPoint(x: -halfWidth + 50, y: top)
-        pauseButton.zPosition = 100
-        addChild(pauseButton)
-
-        scoreLabel.fontSize = 44
-        scoreLabel.fontColor = .white
-        scoreLabel.horizontalAlignmentMode = .left
-        scoreLabel.verticalAlignmentMode = .center
-        scoreLabel.position = CGPoint(x: pauseButton.position.x + 50, y: top)
-        scoreLabel.zPosition = 100
-        addChild(scoreLabel)
-
-        if let existing = childNode(withName: NodeName.lives) as? SKSpriteNode {
-            livesNode = existing
-        } else {
-            livesNode = SKSpriteNode(imageNamed: Images.life(startingLives))
-            livesNode.name = NodeName.lives
-            addChild(livesNode)
-        }
-        livesNode.position = CGPoint(x: halfWidth - livesNode.size.width / 2 - 24, y: top)
-        livesNode.zPosition = 100
-    }
-
     // MARK: Screen geometry
 
     /// The part of the scene that is actually on screen. `.aspectFill` crops the
@@ -203,17 +135,10 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         return CGSize(width: view.bounds.width / scale, height: view.bounds.height / scale)
     }
 
-    /// The top safe area inset (notch / Dynamic Island) converted to scene units.
-    private var topInset: CGFloat {
-        guard let view, view.bounds.height > 0 else { return 0 }
-        let scale = max(view.bounds.width / size.width, view.bounds.height / size.height)
-        return view.safeAreaInsets.top / scale
-    }
-
     // MARK: Spawning
 
     private func spawnFallingItem() {
-        let isWasabi = Double.random(in: 0..<1) < ramp(wasabiChance)
+        let isWasabi = Double.random(in: 0..<1) < model.wasabiChance
         let imageName = isWasabi
             ? Images.wasabi
             : [Images.sushiAhi, Images.sushiAvocado, Images.sushiSalmon, Images.sushiAhi,
@@ -234,12 +159,10 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         body.collisionBitMask = 0
         item.physicsBody = body
 
-        gameLayer.addChild(item)
+        addChild(item)
 
-        // Items fall faster as the difficulty rises.
-        let duration = ramp(fallDuration)
         item.run(.sequence([
-            .moveTo(y: -visibleSize.height / 2 - item.size.height, duration: duration),
+            .moveTo(y: -visibleSize.height / 2 - item.size.height, duration: model.fallDuration),
             .removeFromParent()
         ]))
     }
@@ -256,7 +179,7 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         body.collisionBitMask = 0
         star.physicsBody = body
 
-        gameLayer.addChild(star)
+        addChild(star)
 
         let distance = visibleSize.height / 2 + star.size.height - star.position.y
         star.run(.repeatForever(.rotate(byAngle: -.pi * 2, duration: 0.4)))
@@ -294,7 +217,7 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         // Go back to standing once the finger stops moving. Each move replaces this timer.
         dino.run(.sequence([
             .wait(forDuration: 0.15),
-            .run { [weak self] in self?.stopWalking() }
+            .onMain { [weak self] in self?.stopWalking() }
         ]), withKey: "stop")
     }
 
@@ -307,34 +230,19 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
     // MARK: Touches
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let location = touches.first?.location(in: self) else { return }
-
-        if isGameOver || isGamePaused {
-            if let button = overlay?.childNode(withName: NodeName.continueButton),
-               button.contains(convert(location, to: button.parent ?? self)) {
-                isGameOver ? onExit?() : resumeGame()
-            }
-            return
-        }
-
-        // Give the small pause icon a larger tap target.
-        if pauseButton.frame.insetBy(dx: -30, dy: -30).contains(location) {
-            pauseGame()
-            return
-        }
-
+        guard isPlaying, let location = touches.first?.location(in: self) else { return }
         moveDino(toX: location.x)
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard !isGameOver, !isGamePaused, let location = touches.first?.location(in: self) else { return }
+        guard isPlaying, let location = touches.first?.location(in: self) else { return }
         moveDino(toX: location.x)
     }
 
     // MARK: Contacts
 
     func didBegin(_ contact: SKPhysicsContact) {
-        guard !isGameOver else { return }
+        guard isPlaying else { return }
 
         // Order the bodies so `first` always has the lower category bit.
         let (first, second) = contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask
@@ -358,7 +266,7 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
     }
 
     private func catchSushi(_ sushi: SKNode) {
-        score += sushi.name == Images.sushiCombo ? 30 : 10
+        model.catchSushi(isCombo: sushi.name == Images.sushiCombo)
         sushi.removeAllActions()
         sushi.physicsBody = nil
         sushi.run(.sequence([
@@ -368,7 +276,7 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
     }
 
     private func destroyWasabi(_ wasabi: SKNode, star: SKNode) {
-        score += 5
+        model.destroyWasabi()
         showBlast(Images.blastPurple, at: wasabi.position)
         wasabi.removeFromParent()
         star.removeFromParent()
@@ -380,7 +288,7 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
 
         showBlast(Images.blastRed, at: wasabi.position)
         wasabi.removeFromParent()
-        lives -= 1
+        model.takeHit()
 
         // Show the hit pose briefly, then return to standing.
         dino.removeAction(forKey: "walk")
@@ -390,18 +298,15 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         dino.texture = hit
         dino.run(.sequence([.wait(forDuration: 0.4), .setTexture(stand)]))
 
-        if lives <= 0 {
-            gameOver()
-            return
-        }
+        guard isPlaying else { return }
 
-        // Blink while invincible. Runs on the dino, so it pauses along with the game.
+        // Blink while invincible.
         isInvincible = true
         let blinkCount = Int(invincibilityDuration / 0.2)
         let blink = SKAction.sequence([.fadeAlpha(to: 0.3, duration: 0.1), .fadeAlpha(to: 1, duration: 0.1)])
         dino.run(.sequence([
             .repeat(blink, count: blinkCount),
-            .run { [weak self] in self?.isInvincible = false }
+            .onMain { [weak self] in self?.isInvincible = false }
         ]))
     }
 
@@ -410,84 +315,19 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         blast.position = position
         blast.zPosition = 30
         blast.setScale(0.5)
-        // On the game layer so blasts freeze and hide with the rest of the gameplay.
-        gameLayer.addChild(blast)
+        addChild(blast)
         blast.run(.sequence([
             .group([.scale(to: 1.2, duration: 0.25), .fadeOut(withDuration: 0.25)]),
             .removeFromParent()
         ]))
     }
+}
 
-    // MARK: Pause and game over
-
-    private func pauseGame() {
-        isGamePaused = true
-        setGameplayPaused(true)
-        setGameplayHidden(true)
-        showOverlay(titleImage: nil, message: nil, dimmed: false)
-    }
-
-    private func resumeGame() {
-        isGamePaused = false
-        overlay?.removeFromParent()
-        overlay = nil
-        setGameplayHidden(false)
-        setGameplayPaused(false)
-    }
-
-    private func gameOver() {
-        isGameOver = true
-        setGameplayPaused(true)
-        showOverlay(titleImage: Images.gameOverText, message: "Score: \(score)", dimmed: true)
-    }
-
-    /// Pauses only the gameplay (not the whole scene) so overlays stay interactive.
-    /// Pausing the scene itself is unreliable because SKView un-pauses it when the app becomes active.
-    private func setGameplayPaused(_ paused: Bool) {
-        gameLayer.isPaused = paused
-        dino.isPaused = paused
-        physicsWorld.speed = paused ? 0 : 1
-    }
-
-    /// Hides the gameplay so the pause screen shows only the background, score, hearts and Continue button.
-    private func setGameplayHidden(_ hidden: Bool) {
-        for node in [gameLayer, dino, pauseButton] {
-            node.isHidden = hidden
-        }
-    }
-
-    private func showOverlay(titleImage: String?, message: String?, dimmed: Bool) {
-        let overlay = SKNode()
-        overlay.zPosition = 200
-
-        if dimmed {
-            let dim = SKSpriteNode(color: UIColor.black.withAlphaComponent(0.4), size: size)
-            overlay.addChild(dim)
-        }
-
-        if let titleImage {
-            let title = SKSpriteNode(imageNamed: titleImage)
-            title.position = CGPoint(x: 0, y: 140)
-            overlay.addChild(title)
-        }
-
-        if let message {
-            let label = SKLabelNode(fontNamed: "AvenirNext-Heavy")
-            label.text = message
-            label.fontSize = 48
-            label.fontColor = .white
-            label.verticalAlignmentMode = .center
-            label.position = CGPoint(x: 0, y: 30)
-            overlay.addChild(label)
-        }
-
-        let button = SKSpriteNode(imageNamed: Images.continueButton)
-        button.name = NodeName.continueButton
-        // Center the button when it's shown on its own (the pause screen).
-        button.position = CGPoint(x: 0, y: titleImage == nil ? 0 : -100)
-        overlay.addChild(button)
-
-        addChild(overlay)
-        self.overlay = overlay
+private extension SKAction {
+    /// Runs `block` on the main queue. Swift 6 checks at runtime that main-actor code
+    /// runs on the main thread, and SpriteKit doesn't promise which thread plain
+    /// `run(_:)` blocks use, so this guarantees it.
+    static func onMain(_ block: @escaping @MainActor () -> Void) -> SKAction {
+        .run({ MainActor.assumeIsolated(block) }, queue: .main)
     }
 }

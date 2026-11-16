@@ -36,7 +36,6 @@ enum Images {
     // HUD and overlays
     static let pauseButton = "bttn-pause"
     static let continueButton = "bttn-continue"
-    static let pauseText = "text-pause"
     static let gameOverText = "text-gameover"
 
     /// Lives indicator texture, where `count` is the number of filled hearts (0...3).

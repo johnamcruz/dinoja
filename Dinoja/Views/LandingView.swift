@@ -8,27 +8,30 @@
 import SwiftUI
 
 struct LandingView: View {
-    @State var isPresented = false
+    @State private var isPlaying = false
+
     var body: some View {
-        Image(Images.background)
-            .resizable()
-            .ignoresSafeArea()
-            .overlay(alignment: .top) {
-                VStack {
-                    Spacer()
-                    Image(Images.gameTitle)
-                    Spacer()
-                    Button() {
-                        isPresented = true
-                    } label: {
-                        Image(Images.startGame)
-                    }
-                    Spacer()
+        ZStack {
+            BackgroundImage()
+
+            VStack {
+                Spacer()
+                Image(Images.gameTitle)
+                    .accessibilityLabel("Dinoja")
+                    .accessibilityAddTraits(.isHeader)
+                Spacer()
+                Button {
+                    isPlaying = true
+                } label: {
+                    Image(Images.startGame)
                 }
+                .accessibilityLabel("Start Game")
+                Spacer()
             }
-            .fullScreenCover(isPresented: $isPresented) {
-                GameView()
-            }
+        }
+        .fullScreenCover(isPresented: $isPlaying) {
+            GameView()
+        }
     }
 }
 
