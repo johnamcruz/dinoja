@@ -7,35 +7,58 @@
 
 import XCTest
 
+@MainActor
 final class DinojaUITests: XCTestCase {
+    private var app: XCUIApplication!
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
+    override func setUp() async throws {
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
+        app = XCUIApplication()
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
 
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
+    func testLandingScreenShowsTitleAndStartButton() {
+        XCTAssertTrue(app.images["Dinoja"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Start Game"].exists)
+    }
+
+    func testStartingTheGameShowsTheHUD() {
+        app.buttons["Start Game"].tap()
+
+        XCTAssertTrue(app.buttons["Pause"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts.matching(labelContains: "Score").firstMatch.exists)
+        XCTAssertTrue(app.images["3 lives left"].exists)
+    }
+
+    func testPauseHidesTheGameAndContinueResumes() {
+        app.buttons["Start Game"].tap()
+        let pause = app.buttons["Pause"]
+        XCTAssertTrue(pause.waitForExistence(timeout: 5))
+
+        pause.tap()
+
+        let continueButton = app.buttons["Continue"]
+        XCTAssertTrue(continueButton.waitForExistence(timeout: 5))
+        XCTAssertFalse(pause.exists, "The pause button hides while paused")
+        // Score and hearts stay visible on the pause screen.
+        XCTAssertTrue(app.staticTexts.matching(labelContains: "Score").firstMatch.exists)
+        XCTAssertTrue(app.images.matching(labelContains: "lives left").firstMatch.exists)
+
+        continueButton.tap()
+
+        XCTAssertTrue(pause.waitForExistence(timeout: 5))
+        XCTAssertFalse(continueButton.exists)
+    }
+
+    func testLaunchPerformance() {
+        measure(metrics: [XCTApplicationLaunchMetric()]) {
+            XCUIApplication().launch()
         }
+    }
+}
+
+private extension XCUIElementQuery {
+    func matching(labelContains text: String) -> XCUIElementQuery {
+        matching(NSPredicate(format: "label CONTAINS %@", text))
     }
 }
