@@ -24,7 +24,7 @@ private enum NodeName {
     static let continueButton = "continueButton"
 }
 
-class GameScene: SKScene, SKPhysicsContactDelegate {
+class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
     /// Called when the player leaves the game (Continue on the game over screen).
     var onExit: (() -> Void)?
 
