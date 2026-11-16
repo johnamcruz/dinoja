@@ -20,8 +20,6 @@ final class GameModel {
     // MARK: Rules
 
     static let startingLives = 3
-    static let sushiPoints = 10
-    static let comboPoints = 30
     static let wasabiPoints = 5
 
     /// Score at which the difficulty stops ramping up.
@@ -32,6 +30,10 @@ final class GameModel {
     private(set) var score = 0
     private(set) var lives = GameModel.startingLives
     private(set) var phase = Phase.playing
+
+    /// True right after a hit, so back-to-back hits can't drain every life.
+    /// The scene ends it with `endInvincibility()` once the dino stops blinking.
+    private(set) var isInvincible = false
 
     // MARK: Difficulty
 
@@ -55,9 +57,9 @@ final class GameModel {
 
     // MARK: Events
 
-    func catchSushi(isCombo: Bool) {
+    func collect(_ kind: SushiKind) {
         guard phase == .playing else { return }
-        score += isCombo ? Self.comboPoints : Self.sushiPoints
+        score += kind.points
     }
 
     func destroyWasabi() {
@@ -65,13 +67,20 @@ final class GameModel {
         score += Self.wasabiPoints
     }
 
-    /// Removes a life, ending the game when none are left.
+    /// Removes a life and starts invincibility, ending the game when no lives are left.
+    /// Ignored while already invincible.
     func takeHit() {
-        guard phase == .playing else { return }
+        guard phase == .playing, !isInvincible else { return }
         lives = max(lives - 1, 0)
         if lives == 0 {
             phase = .gameOver
+        } else {
+            isInvincible = true
         }
+    }
+
+    func endInvincibility() {
+        isInvincible = false
     }
 
     func pause() {

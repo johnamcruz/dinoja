@@ -7,14 +7,6 @@
 
 import SpriteKit
 
-/// Bit masks used to detect contacts between game objects.
-private enum PhysicsCategory {
-    static let dino: UInt32 = 1 << 0
-    static let sushi: UInt32 = 1 << 1
-    static let wasabi: UInt32 = 1 << 2
-    static let star: UInt32 = 1 << 3
-}
-
 /// Node names used to find objects in `GameScene.sks`.
 private enum NodeName {
     static let background = "background"
@@ -22,8 +14,9 @@ private enum NodeName {
     static let lives = "score"   // The lives sprite in GameScene.sks is named "score".
 }
 
-/// The gameplay: the dino, falling items, ninja stars and collisions.
-/// The score, hearts and overlays are drawn in SwiftUI from `model`.
+/// Renders the gameplay: the dino, falling items, ninja stars and collisions.
+/// Game rules live in `GameModel`, `FallingItem`, `ContactEvent` and `Playfield`;
+/// this class turns them into sprites and forwards what happens back to `model`.
 class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
     private(set) var model = GameModel()
 
@@ -31,17 +24,23 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
 
     private let dinoScale: CGFloat = 0.6
     private let groundY: CGFloat = -515           // top of the ground strip in the background art
+    private let itemSize = CGSize(width: 90, height: 90)
+    private let starSpeed: CGFloat = 1100         // points per second
     private let fireInterval: TimeInterval = 0.5
     private let invincibilityDuration: TimeInterval = 1.5
 
     // MARK: Nodes and state
 
-    private var dino = SKSpriteNode()
+    private(set) var dino = SKSpriteNode()
     private var facingRight = true
-    private var isInvincible = false
 
     private var isPlaying: Bool {
         model.phase == .playing
+    }
+
+    /// The on-screen area, accounting for `.aspectFill` cropping.
+    var playfield: Playfield {
+        Playfield(sceneSize: size, viewSize: view?.bounds.size ?? .zero)
     }
 
     /// Creates the scene from `GameScene.sks`, sized to match the background art.
@@ -62,7 +61,7 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         setUpBackground()
         setUpDino()
 
-        // SwiftUI draws the hearts now, so drop the lives sprite from the .sks layout.
+        // SwiftUI draws the hearts, so drop the lives sprite from the .sks layout.
         childNode(withName: NodeName.lives)?.removeFromParent()
 
         let fire = SKAction.sequence([
@@ -80,8 +79,9 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         run(.sequence([
             .wait(forDuration: interval, withRange: interval * 0.4),
             .onMain { [weak self] in
-                self?.spawnFallingItem()
-                self?.scheduleNextSpawn()
+                guard let self else { return }
+                spawn(.random(wasabiChance: model.wasabiChance))
+                scheduleNextSpawn()
             }
         ]))
     }
@@ -117,83 +117,66 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         // The art has transparent padding, so the hit box is smaller than the sprite.
         let body = SKPhysicsBody(rectangleOf: CGSize(width: dino.size.width * 0.6,
                                                      height: dino.size.height * 0.7))
-        body.affectedByGravity = false
         body.allowsRotation = false
-        body.categoryBitMask = PhysicsCategory.dino
-        body.contactTestBitMask = PhysicsCategory.sushi | PhysicsCategory.wasabi
-        body.collisionBitMask = 0
-        dino.physicsBody = body
+        dino.physicsBody = configured(body, as: .dino)
     }
 
-    // MARK: Screen geometry
-
-    /// The part of the scene that is actually on screen. `.aspectFill` crops the
-    /// 640x1140 scene on devices with a different aspect ratio.
-    private var visibleSize: CGSize {
-        guard let view, view.bounds.width > 0, view.bounds.height > 0 else { return size }
-        let scale = max(view.bounds.width / size.width, view.bounds.height / size.height)
-        return CGSize(width: view.bounds.width / scale, height: view.bounds.height / scale)
+    /// Applies the bit masks for `collider`. Nothing in the game bounces off anything else,
+    /// so collisions are off and only contacts are reported.
+    private func configured(_ body: SKPhysicsBody, as collider: Collider) -> SKPhysicsBody {
+        body.affectedByGravity = false
+        body.categoryBitMask = collider.bitMask
+        body.contactTestBitMask = collider.contactTestBitMask
+        body.collisionBitMask = 0
+        return body
     }
 
     // MARK: Spawning
 
-    private func spawnFallingItem() {
-        let isWasabi = Double.random(in: 0..<1) < model.wasabiChance
-        let imageName = isWasabi
-            ? Images.wasabi
-            : [Images.sushiAhi, Images.sushiAvocado, Images.sushiSalmon, Images.sushiAhi,
-               Images.sushiAvocado, Images.sushiSalmon, Images.sushiCombo].randomElement() ?? Images.sushiAhi
+    /// Drops `item` from the top of the screen at `x`, or at a random x if `nil`.
+    @discardableResult
+    func spawn(_ item: FallingItem, atX x: CGFloat? = nil) -> SKSpriteNode {
+        let field = playfield
+        let node = SKSpriteNode(imageNamed: item.imageName)
+        node.name = item.imageName
+        node.size = itemSize
+        node.position = CGPoint(x: x ?? .random(in: field.spawnXRange(objectWidth: itemSize.width)),
+                                y: field.spawnY(objectHeight: itemSize.height))
+        node.zPosition = 10
 
-        let item = SKSpriteNode(imageNamed: imageName)
-        item.name = imageName
-        item.size = CGSize(width: 90, height: 90)
-        let halfWidth = visibleSize.width / 2 - item.size.width / 2
-        let top = visibleSize.height / 2 + item.size.height
-        item.position = CGPoint(x: .random(in: -halfWidth...halfWidth), y: top)
-        item.zPosition = 10
+        let collider: Collider = item == .wasabi ? .wasabi : .sushi
+        node.physicsBody = configured(SKPhysicsBody(circleOfRadius: itemSize.width * 0.4), as: collider)
 
-        let body = SKPhysicsBody(circleOfRadius: item.size.width * 0.4)
-        body.affectedByGravity = false
-        body.categoryBitMask = isWasabi ? PhysicsCategory.wasabi : PhysicsCategory.sushi
-        body.contactTestBitMask = PhysicsCategory.dino
-        body.collisionBitMask = 0
-        item.physicsBody = body
-
-        addChild(item)
-
-        item.run(.sequence([
-            .moveTo(y: -visibleSize.height / 2 - item.size.height, duration: model.fallDuration),
+        addChild(node)
+        node.run(.sequence([
+            .moveTo(y: field.despawnY(objectHeight: itemSize.height), duration: model.fallDuration),
             .removeFromParent()
         ]))
+        return node
     }
 
-    private func throwStar() {
+    @discardableResult
+    func throwStar() -> SKSpriteNode {
         let star = SKSpriteNode(imageNamed: Images.ninjaStar)
         star.position = CGPoint(x: dino.position.x, y: dino.position.y + dino.size.height / 3)
         star.zPosition = 15
-
-        let body = SKPhysicsBody(circleOfRadius: star.size.width * 0.4)
-        body.affectedByGravity = false
-        body.categoryBitMask = PhysicsCategory.star
-        body.contactTestBitMask = PhysicsCategory.wasabi
-        body.collisionBitMask = 0
-        star.physicsBody = body
+        star.physicsBody = configured(SKPhysicsBody(circleOfRadius: star.size.width * 0.4), as: .star)
 
         addChild(star)
 
-        let distance = visibleSize.height / 2 + star.size.height - star.position.y
+        let distance = playfield.spawnY(objectHeight: star.size.height) - star.position.y
         star.run(.repeatForever(.rotate(byAngle: -.pi * 2, duration: 0.4)))
         star.run(.sequence([
-            .moveBy(x: 0, y: distance, duration: TimeInterval(distance / 1100)),
+            .moveBy(x: 0, y: distance, duration: TimeInterval(distance / starSpeed)),
             .removeFromParent()
         ]))
+        return star
     }
 
     // MARK: Dino movement
 
-    private func moveDino(toX targetX: CGFloat) {
-        let limit = visibleSize.width / 2 - dino.size.width / 2
-        let x = min(max(targetX, -limit), limit)
+    func moveDino(toX targetX: CGFloat) {
+        let x = playfield.clampedX(targetX, objectWidth: dino.size.width)
         guard abs(x - dino.position.x) > 1 else { return }
 
         // Only restart the walk cycle when the direction changes, so it doesn't
@@ -242,31 +225,38 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
     // MARK: Contacts
 
     func didBegin(_ contact: SKPhysicsContact) {
-        guard isPlaying else { return }
+        guard let a = contact.bodyA.node, let b = contact.bodyB.node else { return }
+        handleContact(between: a, and: b)
+    }
 
-        // Order the bodies so `first` always has the lower category bit.
-        let (first, second) = contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask
-            ? (contact.bodyA, contact.bodyB)
-            : (contact.bodyB, contact.bodyA)
+    /// Applies the game effect of two nodes touching. Separate from `didBegin(_:)`
+    /// so tests can drive it without a physics simulation.
+    func handleContact(between a: SKNode, and b: SKNode) {
+        guard isPlaying,
+              // A node can be part of several contacts in the same frame; skip ones already removed.
+              a.parent != nil, b.parent != nil,
+              let colliderA = a.physicsBody.flatMap({ Collider(bitMask: $0.categoryBitMask) }),
+              let colliderB = b.physicsBody.flatMap({ Collider(bitMask: $0.categoryBitMask) }),
+              let event = ContactEvent(colliderA, colliderB) else { return }
 
-        // A node can be part of several contacts in the same frame; skip ones already removed.
-        guard let firstNode = first.node, let secondNode = second.node,
-              firstNode.parent != nil, secondNode.parent != nil else { return }
+        // The item is whichever node isn't the dino or the star.
+        let item = colliderA == .sushi || colliderA == .wasabi ? a : b
+        let star = colliderA == .star ? a : b
 
-        switch (first.categoryBitMask, second.categoryBitMask) {
-        case (PhysicsCategory.dino, PhysicsCategory.sushi):
-            catchSushi(secondNode)
-        case (PhysicsCategory.dino, PhysicsCategory.wasabi):
-            dinoHit(by: secondNode)
-        case (PhysicsCategory.wasabi, PhysicsCategory.star):
-            destroyWasabi(firstNode, star: secondNode)
-        default:
-            break
+        switch event {
+        case .caughtSushi:
+            catchSushi(item)
+        case .hitByWasabi:
+            dinoHit(by: item)
+        case .shotWasabi:
+            destroyWasabi(item, star: star)
         }
     }
 
     private func catchSushi(_ sushi: SKNode) {
-        model.catchSushi(isCombo: sushi.name == Images.sushiCombo)
+        if case .sushi(let kind) = sushi.name.flatMap(FallingItem.init(imageName:)) {
+            model.collect(kind)
+        }
         sushi.removeAllActions()
         sushi.physicsBody = nil
         sushi.run(.sequence([
@@ -283,8 +273,8 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
     }
 
     private func dinoHit(by wasabi: SKNode) {
-        // Right after a hit, wasabi passes through so back-to-back hits can't drain every life.
-        guard !isInvincible else { return }
+        // While invincible, wasabi passes straight through.
+        guard !model.isInvincible else { return }
 
         showBlast(Images.blastRed, at: wasabi.position)
         wasabi.removeFromParent()
@@ -298,15 +288,14 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         dino.texture = hit
         dino.run(.sequence([.wait(forDuration: 0.4), .setTexture(stand)]))
 
-        guard isPlaying else { return }
+        guard model.isInvincible else { return }
 
-        // Blink while invincible.
-        isInvincible = true
+        // Blink until invincibility ends.
         let blinkCount = Int(invincibilityDuration / 0.2)
         let blink = SKAction.sequence([.fadeAlpha(to: 0.3, duration: 0.1), .fadeAlpha(to: 1, duration: 0.1)])
         dino.run(.sequence([
             .repeat(blink, count: blinkCount),
-            .onMain { [weak self] in self?.isInvincible = false }
+            .onMain { [weak self] in self?.model.endInvincibility() }
         ]))
     }
 
