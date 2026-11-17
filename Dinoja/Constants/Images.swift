@@ -29,6 +29,8 @@ enum Images {
     static let sushiSalmon = "sushi-salmon"
     static let sushiCombo = "sushi-combo"
     static let wasabi = "wasabi"
+    static let heartRed = "heart-red"
+    static let heartBlack = "heart-black"
     static let ninjaStar = "ninja-star"
     static let blastPurple = "blast-purple"
     static let blastRed = "blast-red"
@@ -36,6 +38,8 @@ enum Images {
     // HUD and overlays
     static let pauseButton = "bttn-pause"
     static let continueButton = "bttn-continue"
+    static let saveButton = "bttn-save"
+    static let pauseText = "text-pause"
     static let gameOverText = "text-gameover"
 
     /// Lives indicator texture, where `count` is the number of filled hearts (0...3).

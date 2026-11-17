@@ -10,49 +10,74 @@ import Testing
 struct GameModelTests {
     // MARK: Starting state
 
-    @Test func startsPlayingWithFullLivesAndNoScore() {
+    @Test func startsPlayingAtLevelOneWithThreeHearts() {
         let model = GameModel()
         #expect(model.phase == .playing)
         #expect(model.score == 0)
-        #expect(model.lives == GameModel.startingLives)
+        #expect(model.level == 1)
+        #expect(model.lives == 3)
         #expect(!model.isInvincible)
+        #expect(!model.isStarInFlight)
     }
 
-    // MARK: Scoring
+    // MARK: Rule 4: one ninja star at a time
 
-    @Test(arguments: [SushiKind.ahi, .avocado, .salmon])
-    func regularSushiScoresTenPoints(kind: SushiKind) {
+    @Test func throwingAStarSucceedsWhenNoneIsInFlight() {
         let model = GameModel()
-        model.collect(kind)
-        #expect(model.score == 10)
+        #expect(model.throwStar())
+        #expect(model.isStarInFlight)
     }
 
-    @Test func comboSushiScoresThirtyPoints() {
+    @Test func cannotThrowASecondStarWhileOneIsInFlight() {
         let model = GameModel()
-        model.collect(.combo)
-        #expect(model.score == 30)
+        model.throwStar()
+        #expect(!model.throwStar())
     }
 
-    @Test func shootingWasabiScoresFivePoints() {
+    @Test func canThrowAgainOnceTheStarIsDone() {
         let model = GameModel()
-        model.destroyWasabi()
-        #expect(model.score == 5)
+        model.throwStar()
+        model.starFinished()
+        #expect(!model.isStarInFlight)
+        #expect(model.throwStar())
     }
 
-    @Test func nothingScoresWhilePaused() {
+    @Test func cannotThrowWhilePaused() {
         let model = GameModel()
         model.pause()
-        model.collect(.combo)
-        model.destroyWasabi()
-        #expect(model.score == 0)
+        #expect(!model.throwStar())
     }
 
-    // MARK: Hits and invincibility
+    // MARK: Rules 6 and 7: shooting sushi
 
-    @Test func hitCostsOneLifeAndStartsInvincibility() {
+    @Test(arguments: [SushiKind.ahi, .avocado, .salmon])
+    func shootingSushiScoresOnePoint(kind: SushiKind) {
+        let model = GameModel()
+        model.shoot(.sushi(kind))
+        #expect(model.score == 1)
+    }
+
+    @Test func shootingComboSushiScoresTwoPoints() {
+        let model = GameModel()
+        model.shoot(.sushi(.combo))
+        #expect(model.score == 2)
+    }
+
+    // MARK: Rule 10: wasabi can't be shot
+
+    @Test func shootingWasabiDoesNothing() {
+        let model = GameModel()
+        model.shoot(.wasabi)
+        #expect(model.score == 0)
+        #expect(model.lives == 3)
+    }
+
+    // MARK: Rule 5: three hits and the game is over
+
+    @Test func wasabiHitCostsOneHeartAndStartsInvincibility() {
         let model = GameModel()
         model.takeHit()
-        #expect(model.lives == GameModel.startingLives - 1)
+        #expect(model.lives == 2)
         #expect(model.isInvincible)
     }
 
@@ -60,20 +85,12 @@ struct GameModelTests {
         let model = GameModel()
         model.takeHit()
         model.takeHit()
-        #expect(model.lives == GameModel.startingLives - 1)
+        #expect(model.lives == 2)
     }
 
-    @Test func endingInvincibilityAllowsTheNextHit() {
+    @Test func threeHitsEndTheGame() {
         let model = GameModel()
-        model.takeHit()
-        model.endInvincibility()
-        model.takeHit()
-        #expect(model.lives == GameModel.startingLives - 2)
-    }
-
-    @Test func losingTheLastLifeEndsTheGame() {
-        let model = GameModel()
-        for _ in 0..<GameModel.startingLives {
+        for _ in 0..<3 {
             model.takeHit()
             model.endInvincibility()
         }
@@ -81,19 +98,99 @@ struct GameModelTests {
         #expect(model.phase == .gameOver)
     }
 
-    @Test func gameOverIsFinal() {
+    // MARK: Rules 11 and 12: hearts
+
+    @Test func shootingARedHeartAddsALife() {
         let model = GameModel()
-        for _ in 0..<GameModel.startingLives {
-            model.takeHit()
-            model.endInvincibility()
-        }
-        model.resume()
-        model.collect(.ahi)
+        model.takeHit()
+        model.shoot(.redHeart)
+        #expect(model.lives == 3)
+    }
+
+    @Test func livesNeverExceedThree() {
+        let model = GameModel()
+        model.shoot(.redHeart)
+        #expect(model.lives == model.rules.maxLives)
+    }
+
+    @Test func shootingABlackHeartCostsALife() {
+        let model = GameModel()
+        model.shoot(.blackHeart)
+        #expect(model.lives == 2)
+    }
+
+    @Test func blackHeartCostsALifeEvenWhileInvincible() {
+        // Invincibility protects against wasabi hits, not against your own shots.
+        let model = GameModel()
+        model.takeHit()
+        model.shoot(.blackHeart)
+        #expect(model.lives == 1)
+    }
+
+    @Test func blackHeartOnTheLastLifeEndsTheGame() {
+        let model = GameModel()
+        model.shoot(.blackHeart)
+        model.shoot(.blackHeart)
+        model.shoot(.blackHeart)
         #expect(model.phase == .gameOver)
+    }
+
+    @Test func heartsDoNotScore() {
+        let model = GameModel()
+        model.shoot(.redHeart)
+        model.shoot(.blackHeart)
         #expect(model.score == 0)
     }
 
-    // MARK: Pause
+    // MARK: Rules 8 and 9: levels and speed
+
+    @Test(arguments: [(0, 1), (24, 1), (25, 2), (49, 2), (50, 3), (100, 5)])
+    func levelGoesUpEveryTwentyFivePoints(score: Int, level: Int) {
+        let model = GameModel()
+        for _ in 0..<score { model.shoot(.sushi(.ahi)) }
+        #expect(model.level == level)
+    }
+
+    @Test func itemsFallFasterEachLevel() {
+        let model = GameModel()
+        var previous = model.fallDuration
+        for _ in 0..<5 {
+            for _ in 0..<25 { model.shoot(.sushi(.ahi)) }
+            #expect(model.fallDuration < previous)
+            previous = model.fallDuration
+        }
+    }
+
+    @Test func fallSpeedHasAFloor() {
+        let model = GameModel()
+        for _ in 0..<2_000 { model.shoot(.sushi(.ahi)) }
+        #expect(model.fallDuration == model.rules.minimumFallDuration)
+    }
+
+    // MARK: Custom rules
+
+    @Test func modelFollowsTheRulesItIsGiven() {
+        var rules = GameRules.standard
+        rules.maxLives = 5
+        rules.pointsPerLevel = 2
+        rules.sushiPoints = 2
+        let model = GameModel(rules: rules)
+        #expect(model.lives == 5)
+        model.shoot(.sushi(.ahi))
+        #expect(model.score == 2)
+        #expect(model.level == 2)
+    }
+
+    // MARK: Pause and game over
+
+    @Test func nothingHappensWhilePaused() {
+        let model = GameModel()
+        model.pause()
+        model.shoot(.sushi(.combo))
+        model.takeHit()
+        #expect(model.score == 0)
+        #expect(model.lives == 3)
+    }
 
     @Test func pauseAndResume() {
         let model = GameModel()
@@ -103,31 +200,13 @@ struct GameModelTests {
         #expect(model.phase == .playing)
     }
 
-    // MARK: Difficulty
-
-    @Test func difficultyStartsEasy() {
+    @Test func gameOverIsFinal() {
         let model = GameModel()
-        #expect(model.difficulty == 0)
-        #expect(model.wasabiChance == 0.15)
-        #expect(model.fallDuration == 4.5)
-        #expect(model.spawnInterval == 1.1)
-    }
-
-    @Test func difficultyMaxesOutAtTheThresholdScore() {
-        let model = GameModel()
-        // 34 combos = 1020 points, just past the 1000-point threshold.
-        for _ in 0..<34 { model.collect(.combo) }
-        #expect(model.difficulty == 1)
-        #expect(abs(model.wasabiChance - 0.35) < 0.0001)
-        #expect(abs(model.fallDuration - 2.0) < 0.0001)
-        #expect(abs(model.spawnInterval - 0.6) < 0.0001)
-    }
-
-    @Test func difficultyRampsLinearly() {
-        let model = GameModel()
-        // 500 points = halfway.
-        for _ in 0..<50 { model.collect(.ahi) }
-        #expect(model.difficulty == 0.5)
-        #expect(abs(model.fallDuration - 3.25) < 0.0001)
+        for _ in 0..<3 { model.shoot(.blackHeart) }
+        model.resume()
+        model.shoot(.sushi(.ahi))
+        #expect(model.phase == .gameOver)
+        #expect(model.score == 0)
+        #expect(!model.throwStar())
     }
 }

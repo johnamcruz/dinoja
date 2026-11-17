@@ -5,37 +5,73 @@
 
 import SwiftUI
 
-/// Dims the frozen game and shows the final score with a Continue button.
+/// Covers the game with the background art, hiding the dino and falling items,
+/// and shows the final score with Save (for a top-five score) and Continue.
 struct GameOverOverlay: View {
     let score: Int
+    let level: Int
+    /// Whether the score makes the high-score list.
+    let canSave: Bool
+    let onSave: (String) -> Void
     let onContinue: () -> Void
+
+    @State private var isNaming = false
+    @State private var name = ""
+    @State private var didSave = false
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
+            BackgroundImage()
 
             VStack(spacing: 32) {
+                // The title art is wider than smaller phones, so scale it down to fit.
                 Image(Images.gameOverText)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 441)
+                    .padding(.horizontal, 24)
                     .accessibilityLabel("Game Over")
                     .accessibilityAddTraits(.isHeader)
 
-                Text("Score: \(score)")
-                    .font(.system(.largeTitle, design: .rounded, weight: .heavy))
-                    .foregroundStyle(.white)
-
-                Button(action: onContinue) {
-                    Image(Images.continueButton)
+                VStack(spacing: 4) {
+                    Text("score \(score)")
+                        .font(.system(size: 34, weight: .regular))
+                    Text(didSave ? "saved to high scores" : "level \(level)")
+                        .font(.system(size: 17, weight: .regular))
                 }
-                .accessibilityLabel("Continue")
+                .foregroundStyle(Palette.hudBlue)
+
+                VStack(spacing: 16) {
+                    if canSave && !didSave {
+                        Button {
+                            isNaming = true
+                        } label: {
+                            Image(Images.saveButton)
+                        }
+                        .accessibilityLabel("Save")
+                    }
+
+                    Button(action: onContinue) {
+                        Image(Images.continueButton)
+                    }
+                    .accessibilityLabel("Continue")
+                }
             }
+        }
+        .alert("New high score!", isPresented: $isNaming) {
+            TextField("Name", text: $name)
+                .textInputAutocapitalization(.never)
+            Button("Save") {
+                onSave(name)
+                didSave = true
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Enter a name for the high score list.")
         }
     }
 }
 
 #Preview {
-    ZStack {
-        BackgroundImage()
-        GameOverOverlay(score: 340) {}
-    }
+    GameOverOverlay(score: 34, level: 2, canSave: true, onSave: { _ in }, onContinue: {})
 }

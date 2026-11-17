@@ -14,9 +14,9 @@ private enum NodeName {
     static let lives = "score"   // The lives sprite in GameScene.sks is named "score".
 }
 
-/// Renders the gameplay: the dino, falling items, ninja stars and collisions.
-/// Game rules live in `GameModel`, `FallingItem`, `ContactEvent` and `Playfield`;
-/// this class turns them into sprites and forwards what happens back to `model`.
+/// Renders the gameplay: the dino, falling items, the ninja star and collisions.
+/// Every rule comes from `GameRules` (via `model.rules`); this class turns them into
+/// sprites and reports what happens to `model`.
 class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
     private(set) var model = GameModel()
 
@@ -25,14 +25,36 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
     private let dinoScale: CGFloat = 0.6
     private let groundY: CGFloat = -515           // top of the ground strip in the background art
     private let itemSize = CGSize(width: 90, height: 90)
-    private let starSpeed: CGFloat = 1100         // points per second
-    private let fireInterval: TimeInterval = 0.5
-    private let invincibilityDuration: TimeInterval = 1.5
 
     // MARK: Nodes and state
 
     private(set) var dino = SKSpriteNode()
-    private var facingRight = true
+    /// The dino art currently showing. Every texture change goes through `show(_:)`.
+    private(set) var pose = DinoPose.standing(.right)
+    private var starNode: SKSpriteNode?
+    private(set) var starFlight: NinjaStarFlight?
+
+    // Touch tracking for telling swipes from taps.
+    private var touchStartX: CGFloat = 0
+    private var lastTouchX: CGFloat = 0
+    private var isSwiping = false
+    private var lastUpdateTime: TimeInterval?
+
+    var isFacingRight: Bool {
+        pose.facing == .right
+    }
+
+    /// The image name of the dino's current texture (the first frame while walking).
+    private(set) var dinoImageName = DinoPose.standing(.right).imageName
+
+    private var isShowingHit: Bool {
+        if case .hit = pose { return true }
+        return false
+    }
+
+    private var rules: GameRules {
+        model.rules
+    }
 
     private var isPlaying: Bool {
         model.phase == .playing
@@ -64,26 +86,21 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         // SwiftUI draws the hearts, so drop the lives sprite from the .sks layout.
         childNode(withName: NodeName.lives)?.removeFromParent()
 
-        let fire = SKAction.sequence([
-            .onMain { [weak self] in self?.throwStar() },
-            .wait(forDuration: fireInterval)
-        ])
-        run(.repeatForever(fire))
-        scheduleNextSpawn()
-    }
-
-    /// Spawns one item, then schedules the next. Each wait is recalculated so
-    /// items come faster as the difficulty rises (a fixed repeatForever can't do that).
-    private func scheduleNextSpawn() {
-        let interval = model.spawnInterval
-        run(.sequence([
-            .wait(forDuration: interval, withRange: interval * 0.4),
+        let spawn = SKAction.sequence([
+            .wait(forDuration: rules.spawnInterval, withRange: rules.spawnInterval * 0.4),
             .onMain { [weak self] in
                 guard let self else { return }
-                spawn(.random(wasabiChance: model.wasabiChance))
-                scheduleNextSpawn()
+                spawn(rules.randomItem())
             }
-        ]))
+        ])
+        run(.repeatForever(spawn))
+    }
+
+    override func update(_ currentTime: TimeInterval) {
+        // Cap the step so the star doesn't jump after a pause or a dropped frame.
+        let dt = min(currentTime - (lastUpdateTime ?? currentTime), 1.0 / 30)
+        lastUpdateTime = currentTime
+        advanceStar(by: dt)
     }
 
     // MARK: Setup
@@ -103,12 +120,12 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         if let existing = childNode(withName: NodeName.dino) as? SKSpriteNode {
             dino = existing
         } else {
-            dino = SKSpriteNode(imageNamed: Images.dinoRightStand)
+            dino = SKSpriteNode(imageNamed: DinoPose.standing(.right).imageName)
             dino.name = NodeName.dino
             addChild(dino)
         }
 
-        dino.texture = SKTexture(imageNamed: Images.dinoRightStand)
+        show(.standing(.right))
         // Set the size directly (rather than xScale/yScale) so the physics body uses scene units.
         dino.size = CGSize(width: 275 * dinoScale, height: 241 * dinoScale)
         dino.position = CGPoint(x: 0, y: groundY + dino.size.height / 2)
@@ -121,8 +138,8 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         dino.physicsBody = configured(body, as: .dino)
     }
 
-    /// Applies the bit masks for `collider`. Nothing in the game bounces off anything else,
-    /// so collisions are off and only contacts are reported.
+    /// Applies the bit masks for `collider`. Nothing in the game bounces off anything else
+    /// through physics, so collisions are off and only contacts are reported.
     private func configured(_ body: SKPhysicsBody, as collider: Collider) -> SKPhysicsBody {
         body.affectedByGravity = false
         body.categoryBitMask = collider.bitMask
@@ -134,6 +151,7 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
     // MARK: Spawning
 
     /// Drops `item` from the top of the screen at `x`, or at a random x if `nil`.
+    /// Items fall faster at higher levels.
     @discardableResult
     func spawn(_ item: FallingItem, atX x: CGFloat? = nil) -> SKSpriteNode {
         let field = playfield
@@ -143,9 +161,8 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         node.position = CGPoint(x: x ?? .random(in: field.spawnXRange(objectWidth: itemSize.width)),
                                 y: field.spawnY(objectHeight: itemSize.height))
         node.zPosition = 10
-
-        let collider: Collider = item == .wasabi ? .wasabi : .sushi
-        node.physicsBody = configured(SKPhysicsBody(circleOfRadius: itemSize.width * 0.4), as: collider)
+        node.physicsBody = configured(SKPhysicsBody(circleOfRadius: itemSize.width * 0.4),
+                                      as: Collider(for: item, rules: rules))
 
         addChild(node)
         node.run(.sequence([
@@ -155,71 +172,143 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         return node
     }
 
-    @discardableResult
-    func throwStar() -> SKSpriteNode {
-        let star = SKSpriteNode(imageNamed: Images.ninjaStar)
-        star.position = CGPoint(x: dino.position.x, y: dino.position.y + dino.size.height / 3)
-        star.zPosition = 15
-        star.physicsBody = configured(SKPhysicsBody(circleOfRadius: star.size.width * 0.4), as: .star)
+    // MARK: Ninja star
 
+    /// Throws a star from the dino's hand toward the side it faces.
+    /// Returns `nil` if a star is already in flight or the game isn't running.
+    @discardableResult
+    func throwStar() -> SKSpriteNode? {
+        guard model.throwStar() else { return nil }
+
+        // The hand is toward the front of the art, a little above the middle.
+        let direction = CGFloat(pose.facing.sign)
+        let start = CGPoint(x: dino.position.x + direction * dino.size.width * 0.35,
+                            y: dino.position.y + dino.size.height * 0.1)
+
+        let star = SKSpriteNode(imageNamed: Images.ninjaStar)
+        star.name = Images.ninjaStar
+        star.position = start
+        star.zPosition = 15
+        let radius = star.size.width * 0.4
+        star.physicsBody = configured(SKPhysicsBody(circleOfRadius: radius), as: .star)
+        star.run(.repeatForever(.rotate(byAngle: -direction * .pi * 2, duration: 0.4)))
         addChild(star)
 
-        let distance = playfield.spawnY(objectHeight: star.size.height) - star.position.y
-        star.run(.repeatForever(.rotate(byAngle: -.pi * 2, duration: 0.4)))
-        star.run(.sequence([
-            .moveBy(x: 0, y: distance, duration: TimeInterval(distance / starSpeed)),
-            .removeFromParent()
-        ]))
+        starNode = star
+        starFlight = NinjaStarFlight(from: start, facingRight: pose.facing == .right,
+                                     angleDegrees: rules.starAngleDegrees,
+                                     speed: rules.starSpeed, radius: radius)
         return star
+    }
+
+    /// Moves the star along its angled path, bouncing off the side walls.
+    func advanceStar(by dt: TimeInterval) {
+        guard isPlaying, var flight = starFlight, let star = starNode else { return }
+
+        let visible = playfield.visibleSize
+        let walls = NinjaStarFlight.Walls(left: -visible.width / 2,
+                                          right: visible.width / 2,
+                                          top: visible.height / 2)
+        let state = flight.advance(by: dt, within: walls)
+        starFlight = flight
+        star.position = flight.position
+
+        if state == .offScreen {
+            finishStar()
+        }
+    }
+
+    private func finishStar() {
+        starNode?.removeFromParent()
+        starNode = nil
+        starFlight = nil
+        model.starFinished()
     }
 
     // MARK: Dino movement
 
-    func moveDino(toX targetX: CGFloat) {
-        let x = playfield.clampedX(targetX, objectWidth: dino.size.width)
-        guard abs(x - dino.position.x) > 1 else { return }
+    /// Moves the dino sideways by `dx`, turning it to face the direction of travel.
+    func moveDino(byX dx: CGFloat) {
+        guard let facing = Facing(swipe: Double(dx)) else { return }
+
+        dino.position.x = playfield.clampedX(dino.position.x + dx, objectWidth: dino.size.width)
+
+        // While the hit pose is showing, keep it, but turn so it ends facing the new way.
+        if isShowingHit {
+            if facing != pose.facing {
+                show(.hit(facing))
+            }
+            return
+        }
 
         // Only restart the walk cycle when the direction changes, so it doesn't
         // reset to the first frame on every touch event.
-        let newFacingRight = x > dino.position.x
-        let directionChanged = newFacingRight != facingRight
-        facingRight = newFacingRight
-
-        // Snap straight to the finger so the dino stays directly under it.
-        dino.position.x = x
-
-        if directionChanged || dino.action(forKey: "walk") == nil {
-            let walkTextures = facingRight
-                ? [Images.dinoRightWalkA, Images.dinoRightWalkB]
-                : [Images.dinoLeftWalkA, Images.dinoLeftWalkB]
-            dino.run(.repeatForever(.animate(with: walkTextures.map { SKTexture(imageNamed: $0) },
-                                             timePerFrame: 0.1)),
-                     withKey: "walk")
+        if pose != .walking(facing) || dino.action(forKey: "walk") == nil {
+            show(.walking(facing))
+            let frames = DinoPose.walkCycle(facing).map { SKTexture(imageNamed: $0.imageName) }
+            dino.run(.repeatForever(.animate(with: frames, timePerFrame: 0.1)), withKey: "walk")
         }
 
-        // Go back to standing once the finger stops moving. Each move replaces this timer.
+        // Go back to standing once the swipe stops. Each move replaces this timer.
         dino.run(.sequence([
             .wait(forDuration: 0.15),
             .onMain { [weak self] in self?.stopWalking() }
         ]), withKey: "stop")
     }
 
-    private func stopWalking() {
+    func stopWalking() {
         dino.removeAction(forKey: "walk")
         dino.removeAction(forKey: "stop")
-        dino.texture = SKTexture(imageNamed: facingRight ? Images.dinoRightStand : Images.dinoLeftStand)
+        guard !isShowingHit else { return }
+        show(.standing(pose.facing))
+    }
+
+    /// Ends the hit pose, standing in whichever direction the dino faces now.
+    func finishHitPose() {
+        guard isShowingHit else { return }
+        show(.standing(pose.facing))
+    }
+
+    private func show(_ newPose: DinoPose) {
+        pose = newPose
+        dinoImageName = newPose.imageName
+        dino.texture = SKTexture(imageNamed: newPose.imageName)
     }
 
     // MARK: Touches
 
+    // A touch that moves sideways past `rules.swipeThreshold` is a swipe and moves the dino.
+    // A touch that lifts without moving that far is a tap and throws a star.
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard isPlaying, let location = touches.first?.location(in: self) else { return }
-        moveDino(toX: location.x)
+        guard let x = touches.first?.location(in: self).x else { return }
+        touchStartX = x
+        lastTouchX = x
+        isSwiping = false
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard isPlaying, let location = touches.first?.location(in: self) else { return }
-        moveDino(toX: location.x)
+        guard isPlaying, let x = touches.first?.location(in: self).x else { return }
+        if !isSwiping, abs(x - touchStartX) > rules.swipeThreshold {
+            isSwiping = true
+            // Count the distance moved before the swipe was recognized, so the dino keeps up with the finger.
+            lastTouchX = touchStartX
+        }
+        if isSwiping {
+            moveDino(byX: x - lastTouchX)
+        }
+        lastTouchX = x
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if isPlaying, !isSwiping {
+            throwStar()
+        }
+        isSwiping = false
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        isSwiping = false
     }
 
     // MARK: Contacts
@@ -239,37 +328,28 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
               let colliderB = b.physicsBody.flatMap({ Collider(bitMask: $0.categoryBitMask) }),
               let event = ContactEvent(colliderA, colliderB) else { return }
 
-        // The item is whichever node isn't the dino or the star.
-        let item = colliderA == .sushi || colliderA == .wasabi ? a : b
-        let star = colliderA == .star ? a : b
-
         switch event {
-        case .caughtSushi:
-            catchSushi(item)
         case .hitByWasabi:
-            dinoHit(by: item)
-        case .shotWasabi:
-            destroyWasabi(item, star: star)
+            dinoHit(by: colliderA == .wasabi ? a : b)
+        case .shotTarget:
+            let (target, star) = colliderA == .target ? (a, b) : (b, a)
+            shoot(target, with: star)
         }
     }
 
-    private func catchSushi(_ sushi: SKNode) {
-        if case .sushi(let kind) = sushi.name.flatMap(FallingItem.init(imageName:)) {
-            model.collect(kind)
-        }
-        sushi.removeAllActions()
-        sushi.physicsBody = nil
-        sushi.run(.sequence([
-            .group([.scale(to: 0.2, duration: 0.15), .fadeOut(withDuration: 0.15)]),
-            .removeFromParent()
-        ]))
-    }
+    private func shoot(_ target: SKNode, with star: SKNode) {
+        guard let item = target.name.flatMap(FallingItem.init(imageName:)) else { return }
+        model.shoot(item)
 
-    private func destroyWasabi(_ wasabi: SKNode, star: SKNode) {
-        model.destroyWasabi()
-        showBlast(Images.blastPurple, at: wasabi.position)
-        wasabi.removeFromParent()
-        star.removeFromParent()
+        showBlast(item.shotBlastImageName, at: target.position)
+        target.removeFromParent()
+
+        // The star stops at the first thing it hits, freeing the dino to throw again.
+        if star === starNode {
+            finishStar()
+        } else {
+            star.removeFromParent()
+        }
     }
 
     private func dinoHit(by wasabi: SKNode) {
@@ -280,18 +360,19 @@ class GameScene: SKScene, @preconcurrency SKPhysicsContactDelegate {
         wasabi.removeFromParent()
         model.takeHit()
 
-        // Show the hit pose briefly, then return to standing.
+        // Show the hit pose briefly, then stand facing whichever way the dino faces by then.
         dino.removeAction(forKey: "walk")
         dino.removeAction(forKey: "stop")
-        let hit = SKTexture(imageNamed: facingRight ? Images.dinoRightHit : Images.dinoLeftHit)
-        let stand = SKTexture(imageNamed: facingRight ? Images.dinoRightStand : Images.dinoLeftStand)
-        dino.texture = hit
-        dino.run(.sequence([.wait(forDuration: 0.4), .setTexture(stand)]))
+        show(.hit(pose.facing))
+        dino.run(.sequence([
+            .wait(forDuration: 0.4),
+            .onMain { [weak self] in self?.finishHitPose() }
+        ]), withKey: "hitPose")
 
         guard model.isInvincible else { return }
 
         // Blink until invincibility ends.
-        let blinkCount = Int(invincibilityDuration / 0.2)
+        let blinkCount = Int(rules.invincibilityDuration / 0.2)
         let blink = SKAction.sequence([.fadeAlpha(to: 0.3, duration: 0.1), .fadeAlpha(to: 1, duration: 0.1)])
         dino.run(.sequence([
             .repeat(blink, count: blinkCount),

@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// Hides the game behind the background art and shows only the Continue button.
+/// Hides the game behind the background art and shows the Pause title and Continue button.
 struct PauseOverlay: View {
     let onContinue: () -> Void
 
@@ -13,10 +13,16 @@ struct PauseOverlay: View {
         ZStack {
             BackgroundImage()
 
-            Button(action: onContinue) {
-                Image(Images.continueButton)
+            VStack(spacing: 40) {
+                Image(Images.pauseText)
+                    .accessibilityLabel("Pause")
+                    .accessibilityAddTraits(.isHeader)
+
+                Button(action: onContinue) {
+                    Image(Images.continueButton)
+                }
+                .accessibilityLabel("Continue")
             }
-            .accessibilityLabel("Continue")
         }
     }
 }

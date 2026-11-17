@@ -26,6 +26,11 @@
 		6B7CD67830ABB851007F6388 /* PlayfieldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B7CD67730ABB851007F6388 /* PlayfieldTests.swift */; };
 		6B7CD67A30ABB857007F6388 /* ContactEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B7CD67930ABB857007F6388 /* ContactEventTests.swift */; };
 		6B7CD68230ABB93E007F6388 /* GameSceneIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B7CD68130ABB93E007F6388 /* GameSceneIntegrationTests.swift */; };
+		6B7CD68C30ABEA50007F6388 /* NinjaStarFlightTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B7CD68B30ABEA50007F6388 /* NinjaStarFlightTests.swift */; };
+		6B7CD69030ABEB9C007F6388 /* GameRulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B7CD68F30ABEB9C007F6388 /* GameRulesTests.swift */; };
+		6B7CD69430ABEE52007F6388 /* HighScoresTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B7CD69330ABEE52007F6388 /* HighScoresTests.swift */; };
+		6B7CD69830ABEEB7007F6388 /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B7CD69730ABEEB7007F6388 /* Palette.swift */; };
+		6B7CD69A30ABF0B5007F6388 /* DinoPoseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B7CD69930ABF0B5007F6388 /* DinoPoseTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,7 +72,12 @@
 		6B7CD67530ABB84A007F6388 /* FallingItemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FallingItemTests.swift; sourceTree = "<group>"; };
 		6B7CD67730ABB851007F6388 /* PlayfieldTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayfieldTests.swift; sourceTree = "<group>"; };
 		6B7CD67930ABB857007F6388 /* ContactEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactEventTests.swift; sourceTree = "<group>"; };
-		6B7CD68130ABB93E007F6388 /* GameSceneIntegrationTests.swift */ = {isa = PBXFileReference; path = GameSceneIntegrationTests.swift; sourceTree = "<group>"; };
+		6B7CD68130ABB93E007F6388 /* GameSceneIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSceneIntegrationTests.swift; sourceTree = "<group>"; };
+		6B7CD68B30ABEA50007F6388 /* NinjaStarFlightTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NinjaStarFlightTests.swift; sourceTree = "<group>"; };
+		6B7CD68F30ABEB9C007F6388 /* GameRulesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRulesTests.swift; sourceTree = "<group>"; };
+		6B7CD69330ABEE52007F6388 /* HighScoresTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighScoresTests.swift; sourceTree = "<group>"; };
+		6B7CD69730ABEEB7007F6388 /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
+		6B7CD69930ABF0B5007F6388 /* DinoPoseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DinoPoseTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -103,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				6B0D7E6A2ACA3F28001A94FD /* Images.swift */,
+				6B7CD69730ABEEB7007F6388 /* Palette.swift */,
 			);
 			path = Constants;
 			sourceTree = "<group>";
@@ -158,6 +169,10 @@
 				6B7CD67730ABB851007F6388 /* PlayfieldTests.swift */,
 				6B7CD67930ABB857007F6388 /* ContactEventTests.swift */,
 				6B7CD68130ABB93E007F6388 /* GameSceneIntegrationTests.swift */,
+				6B7CD68B30ABEA50007F6388 /* NinjaStarFlightTests.swift */,
+				6B7CD68F30ABEB9C007F6388 /* GameRulesTests.swift */,
+				6B7CD69330ABEE52007F6388 /* HighScoresTests.swift */,
+				6B7CD69930ABF0B5007F6388 /* DinoPoseTests.swift */,
 			);
 			path = DinojaTests;
 			sourceTree = "<group>";
@@ -334,6 +349,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6B7CD69830ABEEB7007F6388 /* Palette.swift in Sources */,
 				6B0D7E6F2ACA4E79001A94FD /* GameScene.swift in Sources */,
 				6B0D7E6D2ACA43FE001A94FD /* LandingView.swift in Sources */,
 				6B0D7E6B2ACA3F28001A94FD /* Images.swift in Sources */,
@@ -350,8 +366,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6B7CD69A30ABF0B5007F6388 /* DinoPoseTests.swift in Sources */,
 				6B7CD67830ABB851007F6388 /* PlayfieldTests.swift in Sources */,
 				6B7CD67430ABB841007F6388 /* GameModelTests.swift in Sources */,
+				6B7CD69430ABEE52007F6388 /* HighScoresTests.swift in Sources */,
+				6B7CD68C30ABEA50007F6388 /* NinjaStarFlightTests.swift in Sources */,
+				6B7CD69030ABEB9C007F6388 /* GameRulesTests.swift in Sources */,
 				6B7CD68230ABB93E007F6388 /* GameSceneIntegrationTests.swift in Sources */,
 				6B7CD67A30ABB857007F6388 /* ContactEventTests.swift in Sources */,
 				6B7CD67630ABB84A007F6388 /* FallingItemTests.swift in Sources */,

@@ -5,46 +5,61 @@
 
 import SwiftUI
 
-/// Score, pause button and hearts along the top of the screen.
+/// The slim bar along the top of the game, as in the design:
+/// pause icon, "score N", hearts, and "level N" on the right, all in the hearts' light blue.
 struct HUD: View {
     let score: Int
+    let level: Int
     let lives: Int
     let showsPauseButton: Bool
     let onPause: () -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 14) {
             if showsPauseButton {
                 Button(action: onPause) {
                     Image(Images.pauseButton)
-                        .padding(6)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 16, height: 16)
+                        // A bigger tap target than the small icon.
+                        .frame(width: 44, height: 44)
+                        .contentShape(.rect)
                 }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
+                .buttonStyle(.plain)
                 .accessibilityLabel("Pause")
+            } else {
+                // Keep the space so the score and hearts don't shift while paused.
+                Color.clear.frame(width: 44, height: 44)
             }
 
-            Text(score, format: .number)
-                .font(.system(.largeTitle, design: .rounded, weight: .heavy))
+            Text("score \(score)")
                 .monospacedDigit()
-                .foregroundStyle(.white)
                 .contentTransition(.numericText(value: Double(score)))
                 .animation(.snappy, value: score)
                 .accessibilityLabel("Score \(score)")
 
+            Image(Images.life(lives))
+                .resizable()
+                .scaledToFit()
+                .frame(height: 16)
+                .accessibilityLabel(lives == 1 ? "1 life left" : "\(lives) lives left")
+
             Spacer()
 
-            Image(Images.life(lives))
-                .accessibilityLabel(lives == 1 ? "1 life left" : "\(lives) lives left")
+            Text("level \(level)")
+                .accessibilityLabel("Level \(level)")
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 8)
+        .font(.system(size: 17, weight: .regular))
+        .foregroundStyle(Palette.hudBlue)
+        .padding(.leading, 6)
+        .padding(.trailing, 20)
     }
 }
 
 #Preview {
     ZStack(alignment: .top) {
         BackgroundImage()
-        HUD(score: 120, lives: 2, showsPauseButton: true) {}
+        HUD(score: 210, level: 1, lives: 2, showsPauseButton: true) {}
     }
 }

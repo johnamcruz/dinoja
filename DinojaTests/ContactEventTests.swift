@@ -7,32 +7,28 @@ import Testing
 @testable import Dinoja
 
 struct ContactEventTests {
-    @Test func dinoAndSushiIsACatch() {
-        #expect(ContactEvent(.dino, .sushi) == .caughtSushi)
-    }
-
-    @Test func dinoAndWasabiIsAHit() {
+    @Test func wasabiTouchingTheDinoIsAHit() {
         #expect(ContactEvent(.dino, .wasabi) == .hitByWasabi)
     }
 
-    @Test func starAndWasabiIsAShot() {
-        #expect(ContactEvent(.star, .wasabi) == .shotWasabi)
+    @Test func starTouchingATargetIsAShot() {
+        #expect(ContactEvent(.star, .target) == .shotTarget)
     }
 
     @Test(arguments: [
-        (Collider.dino, Collider.sushi),
-        (.dino, .wasabi),
-        (.star, .wasabi),
+        (Collider.dino, Collider.wasabi),
+        (.star, .target),
     ])
     func orderDoesNotMatter(a: Collider, b: Collider) {
         #expect(ContactEvent(a, b) == ContactEvent(b, a))
     }
 
     @Test(arguments: [
-        (Collider.star, Collider.sushi),
+        (Collider.star, Collider.wasabi),   // Rule 10: wasabi can't be shot.
+        (.dino, .target),                   // Sushi and hearts only count when shot.
         (.dino, .star),
-        (.sushi, .wasabi),
-        (.sushi, .sushi),
+        (.target, .wasabi),
+        (.target, .target),
     ])
     func otherPairsAreIgnored(a: Collider, b: Collider) {
         #expect(ContactEvent(a, b) == nil)
@@ -53,8 +49,15 @@ struct ContactEventTests {
         #expect(Collider(bitMask: 0) == nil)
     }
 
-    @Test func eachColliderTestsAgainstWhatItCanHit() {
-        #expect(Collider.dino.contactTestBitMask == Collider.sushi.bitMask | Collider.wasabi.bitMask)
-        #expect(Collider.star.contactTestBitMask == Collider.wasabi.bitMask)
+    @Test func starsOnlyReportTargetsAndTheDinoOnlyReportsWasabi() {
+        #expect(Collider.star.contactTestBitMask == Collider.target.bitMask)
+        #expect(Collider.dino.contactTestBitMask == Collider.wasabi.bitMask)
+    }
+
+    @Test func wasabiIsItsOwnColliderAndEverythingElseIsATarget() {
+        #expect(Collider(for: .wasabi) == .wasabi)
+        for item in FallingItem.allCases where item != .wasabi {
+            #expect(Collider(for: item) == .target)
+        }
     }
 }
