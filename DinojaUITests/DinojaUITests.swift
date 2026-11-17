@@ -2,8 +2,6 @@
 //  DinojaUITests.swift
 //  DinojaUITests
 //
-//  Created by John M Cruz on 4/30/23.
-//
 
 import XCTest
 
