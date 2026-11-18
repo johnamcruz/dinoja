@@ -8,7 +8,6 @@ import SpriteKit
 
 struct GameView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(HighScores.self) private var highScores
     // Stored in @State so the scene is created once instead of on every view update.
     @State private var scene = GameScene.makeScene()
     /// Briefly shows "Level N" in the middle of the screen after a level-up.
@@ -37,11 +36,7 @@ struct GameView: View {
             case .paused:
                 PauseOverlay { model.resume() }
             case .gameOver:
-                GameOverOverlay(score: model.score,
-                                level: model.level,
-                                canSave: highScores.qualifies(model.score),
-                                onSave: { highScores.save(name: $0, score: model.score) },
-                                onContinue: { dismiss() })
+                GameOverOverlay(score: model.score, level: model.level) { dismiss() }
             }
         }
         .overlay(alignment: .top) {
@@ -70,5 +65,4 @@ struct GameView: View {
 
 #Preview {
     GameView()
-        .environment(HighScores())
 }

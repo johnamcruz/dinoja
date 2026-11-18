@@ -36,7 +36,6 @@ enum Images {
     // HUD and overlays
     static let pauseButton = "bttn-pause"
     static let continueButton = "bttn-continue"
-    static let saveButton = "bttn-save"
     static let pauseText = "text-pause"
     static let gameOverText = "text-gameover"
 
